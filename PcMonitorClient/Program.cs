@@ -1,31 +1,29 @@
-﻿using PcMonitorClient;
+﻿using PcMonitorClient.Services;
 using System;
 using System.Threading.Tasks;
 
-class Program
+namespace PcMonitorClient
 {
-    static async Task Main(string[] args)
+    class Program
     {
-        // Настроить логирование
-        LogManager.ConfigureLogging();
+        static async Task Main(string[] args)
+        {
+            Logger.Log("Запуск программы.");
 
-        // Пример логирования
-        await LogMessage("Запуск программы.");
+            try
+            {
+                string configPath = "config.json";
+                ConfigReader config = ConfigReader.LoadConfig(configPath);
 
-        // Сбор и отправка данных
-        var collector = new InfoCollector();
-        await collector.CollectAndSaveInfo();
+                InfoCollector collector = new InfoCollector(config);
+                await collector.CollectAndSendInfoAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Ошибка выполнения программы: {ex.Message}");
+            }
 
-        // Пример логирования завершения
-        await LogMessage("Программа завершена.");
-
-        // Закрыть логирование в конце программы
-        LogManager.Close();
-    }
-
-    // Асинхронная запись в лог
-    static async Task LogMessage(string message)
-    {
-        await LogManager.LogMessageAsync(message);
+            Logger.Log("Программа завершена.");
+        }
     }
 }

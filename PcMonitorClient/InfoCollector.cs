@@ -1,33 +1,43 @@
-﻿using PcMonitorClient;
+﻿using PcMonitorClient.Services;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
-public class InfoCollector
+namespace PcMonitorClient
 {
-    public async Task CollectAndSaveInfo()
+    /// <summary>
+    /// Класс, координирующий сбор, сохранение и отправку данных.
+    /// </summary>
+    public class InfoCollector
     {
-        try
+        private readonly SystemInfoCollector _systemInfoCollector;
+        private readonly FileManager _fileManager;
+        private readonly WebServiceSender _webServiceSender;
+        private readonly ConfigReader _config;
+
+        public InfoCollector(ConfigReader config)
         {
-            await LogMessage("Начало сбора информации...");
-
-            // Пример сбора информации
-            var systemInfo = new SystemInfo();
-            var memoryInfo = new MemoryInfo();
-
-            // Здесь будет сбор и сохранение данных
-
-            await LogMessage("Информация собрана успешно.");
+            _config = config;
+            _systemInfoCollector = new SystemInfoCollector();
+            _fileManager = new FileManager();
+            _webServiceSender = new WebServiceSender(config);
         }
-        catch (Exception ex)
+
+        /// <summary>
+        /// Выполняет сбор, сохранение и отправку данных.
+        /// </summary>
+        public async Task CollectAndSendInfoAsync()
         {
-            await LogMessage($"Ошибка при сборе информации: {ex.Message}");
-        }
-    }
+            Logger.Log("Начало сбора информации...");
 
-    // Асинхронная запись в лог
-    static async Task LogMessage(string message)
-    {
-        await LogManager.LogMessageAsync(message);
+            var systemInfo = _systemInfoCollector.CollectSystemInfo();
+            string computerName = ((dynamic)systemInfo).ComputerName;
+
+            Task saveTask = Task.Run(() => _fileManager.SaveToFile(systemInfo, computerName));
+            Task sendTask = _webServiceSender.SendToWebServiceAsync(systemInfo);
+
+            await Task.WhenAll(saveTask, sendTask);
+
+            Logger.Log("Операции сбора, сохранения и отправки завершены.");
+        }
     }
 }
