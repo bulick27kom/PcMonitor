@@ -4,7 +4,7 @@
     public class Group
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public List<Computer> Computers { get; set; } = new();
+        public string Name { get; set; } = string.Empty;
+        public ICollection<Computer> Computers { get; set; } = new List<Computer>();
     }
 }

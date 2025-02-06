@@ -14,6 +14,7 @@
         public string WorkgroupOrDomain { get; set; }
         public string LastBootTime { get; set; }
         public List<NetworkInterface> NetworkInterfaces { get; set; }
-        public int? GroupId { get; set; } // Для группировки компьютеров
+        public int? GroupId { get; set; } // Внешний ключ для связи с группой
+        public Group Group { get; set; }  // Навигационное свойство для группы
     }
 }
