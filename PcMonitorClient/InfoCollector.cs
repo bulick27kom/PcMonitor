@@ -27,7 +27,7 @@ namespace PcMonitorClient
         /// </summary>
         public async Task CollectAndSendInfoAsync()
         {
-            Logger.Log("Начало сбора информации...");
+            Logger.Info("Начало сбора информации...");
 
             var systemInfo = _systemInfoCollector.CollectSystemInfo();
             string computerName = ((dynamic)systemInfo).ComputerName;
@@ -37,7 +37,7 @@ namespace PcMonitorClient
 
             await Task.WhenAll(saveTask, sendTask);
 
-            Logger.Log("Операции сбора, сохранения и отправки завершены.");
+            Logger.Info("Операции сбора, сохранения и отправки завершены.");
         }
     }
 }

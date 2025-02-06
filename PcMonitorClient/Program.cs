@@ -8,7 +8,7 @@ namespace PcMonitorClient
     {
         static async Task Main(string[] args)
         {
-            Logger.Log("Запуск программы.");
+            Logger.Info("Запуск программы.");
 
             try
             {
@@ -20,10 +20,10 @@ namespace PcMonitorClient
             }
             catch (Exception ex)
             {
-                Logger.Log($"Ошибка выполнения программы: {ex.Message}");
+                Logger.Error($"Ошибка выполнения программы: {ex.Message}");
             }
 
-            Logger.Log("Программа завершена.");
+            Logger.Info("Программа завершена.");
         }
     }
 }

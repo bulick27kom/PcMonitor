@@ -39,27 +39,27 @@ namespace PcMonitorClient.Services
                 string json = JsonConvert.SerializeObject(data);
                 using (HttpContent content = new StringContent(json, Encoding.UTF8, "application/json"))
                 {
-                    Logger.Log($"Отправка данных на {url}...");
+                    Logger.Info($"Отправка данных на {url}...");
 
                     HttpResponseMessage response = await _httpClient.PostAsync(url, content);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        Logger.Log("Данные успешно отправлены.");
+                        Logger.Info("Данные успешно отправлены.");
                     }
                     else
                     {
-                        Logger.Log($"Ошибка отправки данных: {response.StatusCode}");
+                        Logger.Error($"Ошибка отправки данных: {response.StatusCode}");
                     }
                 }
             }
             catch (TaskCanceledException)
             {
-                Logger.Log("Ошибка: Таймаут ожидания ответа от сервера.");
+                Logger.Error("Ошибка: Таймаут ожидания ответа от сервера.");
             }
             catch (Exception ex)
             {
-                Logger.Log($"Исключение при отправке данных: {ex.Message}");
+                Logger.Error($"Исключение при отправке данных: {ex.Message}");
             }
         }
     }

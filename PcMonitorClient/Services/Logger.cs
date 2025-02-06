@@ -1,81 +1,68 @@
-﻿// Logger.cs
+﻿using Serilog;
 using System;
 using System.IO;
-using System.Linq;
 
 namespace PcMonitorClient.Services
 {
     /// <summary>
-    /// Класс для логирования операций с автоматическим управлением размером и очисткой старых записей.
+    /// Класс для логирования операций с использованием Serilog.
     /// </summary>
     public static class Logger
     {
         private static readonly string LogFilePath = Path.Combine(Directory.GetCurrentDirectory(), "log.txt");
         private const int MaxLogSizeMB = 5;
-        private const int MaxLogSizeBytes = MaxLogSizeMB * 1024 * 1024;
         private const int LogRetentionDays = 30;
 
-        /// <summary>
-        /// Записывает сообщение в лог-файл с меткой даты и времени.
-        /// </summary>
-        /// <param name="message">Текст сообщения.</param>
-        public static void Log(string message)
+        static Logger()
         {
-            string timestamp = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss");
-            string logEntry = $"{timestamp} - {message}";
-
-            try
-            {
-                File.AppendAllText(LogFilePath, logEntry + Environment.NewLine);
-                ManageLogFile();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при записи лога: {ex.Message}");
-            }
+            ConfigureLogger();
         }
 
         /// <summary>
-        /// Удаляет записи старше 30 дней и контролирует размер файла.
+        /// Настраивает Serilog для работы с файлами логов.
         /// </summary>
-        private static void ManageLogFile()
+        private static void ConfigureLogger()
         {
-            try
-            {
-                if (!File.Exists(LogFilePath)) return;
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(
+                    LogFilePath,
+                    retainedFileCountLimit: LogRetentionDays, // Хранить только 30 дней логов
+                    fileSizeLimitBytes: MaxLogSizeMB * 1024 * 1024, // 5MB на файл
+                    rollOnFileSizeLimit: true, // Автоматическая ротация при превышении размера
+                    shared: true) // Разделяемый доступ к файлу (нет блокировки)
+                .CreateLogger();
+        }
 
-                var lines = File.ReadAllLines(LogFilePath).ToList();
-                DateTime cutoffDate = DateTime.Now.AddDays(-LogRetentionDays);
+        /// <summary>
+        /// Записывает информационное сообщение в лог.
+        /// </summary>
+        public static void Info(string message)
+        {
+            Log.Information(message);
+        }
 
-                // Фильтруем старые записи
-                lines = lines.Where(line =>
-                {
-                    if (line.Length < 19) return false; // Пропускаем некорректные строки
-                    if (DateTime.TryParseExact(line.Substring(0, 19), "dd.MM.yyyy HH:mm:ss", null, System.Globalization.DateTimeStyles.None, out DateTime logDate))
-                    {
-                        return logDate >= cutoffDate;
-                    }
-                    return false;
-                }).ToList();
+        /// <summary>
+        /// Записывает предупреждение в лог.
+        /// </summary>
+        public static void Warn(string message)
+        {
+            Log.Warning(message);
+        }
 
-                // Проверяем размер файла
-                if (lines.Count > 0)
-                {
-                    File.WriteAllLines(LogFilePath, lines);
-                    if (new FileInfo(LogFilePath).Length > MaxLogSizeBytes)
-                    {
-                        File.WriteAllLines(LogFilePath, lines.Skip(lines.Count / 2)); // Оставляем только половину записей
-                    }
-                }
-                else
-                {
-                    File.Delete(LogFilePath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при управлении лог-файлом: {ex.Message}");
-            }
+        /// <summary>
+        /// Записывает ошибку в лог.
+        /// </summary>
+        public static void Error(string message, Exception ex = null)
+        {
+            Log.Error(ex, message);
+        }
+
+        /// <summary>
+        /// Освобождает ресурсы перед завершением программы.
+        /// </summary>
+        public static void Close()
+        {
+            Log.CloseAndFlush();
         }
     }
 }

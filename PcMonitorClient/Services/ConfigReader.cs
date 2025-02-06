@@ -51,12 +51,12 @@ namespace PcMonitorClient.Services
                     throw new Exception("Ошибка чтения конфигурации: 'RequestTimeout' должен быть больше 0.");
                 }
 
-                Logger.Log("Конфигурация загружена успешно.");
+                Logger.Info("Конфигурация загружена успешно.");
                 return config;
             }
             catch (Exception ex)
             {
-                Logger.Log($"Ошибка загрузки конфигурации: {ex.Message}");
+                Logger.Error($"Ошибка загрузки конфигурации: {ex.Message}");
                 throw;
             }
         }

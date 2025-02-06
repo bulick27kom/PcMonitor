@@ -23,11 +23,11 @@ namespace PcMonitorClient.Services
                 string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
 
                 File.WriteAllText(filePath, json);
-                Logger.Log($"Информация сохранена в {filePath}");
+                Logger.Info($"Информация сохранена в {filePath}");
             }
             catch (Exception ex)
             {
-                Logger.Log($"Ошибка сохранения файла: {ex.Message}");
+                Logger.Error($"Ошибка сохранения файла: {ex.Message}");
             }
         }
     }

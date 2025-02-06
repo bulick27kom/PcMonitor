@@ -22,7 +22,7 @@ namespace PcMonitorClient
         /// <returns>Объект с информацией.</returns>
         public object CollectSystemInfo()
         {
-            Logger.Log("Сбор информации о системе...");
+            Logger.Info("Сбор информации о системе...");
 
             string computerName = _softwareInfo.GetComputerName();
             var processor = _processorInfo.GetProcessorInfo();
