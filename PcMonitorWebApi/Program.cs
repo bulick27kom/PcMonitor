@@ -16,9 +16,9 @@ internal class Program
             configuration.WriteTo.Console();
         });
 
-        // Добавление DbContext с SQLite
+        // Подключение базы данных (SQLite по умолчанию)
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite("Data Source=db.db"));
+            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
         // Добавление сервисов в контейнер
