@@ -15,6 +15,6 @@
         public string LastBootTime { get; set; }
         public ICollection<NetworkInterface> NetworkInterfaces { get; set; }
         public int? GroupId { get; set; } // Внешний ключ для связи с группой
-        public Group Group { get; set; }  // Навигационное свойство для группы
+        public Group? Group { get; set; }  // Навигационное свойство для группы
     }
 }

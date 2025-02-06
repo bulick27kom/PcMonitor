@@ -37,8 +37,12 @@ internal class Program
 
         var app = builder.Build();
 
-        // Инициализация базы данных
-        InitializeDatabase(app);
+        // Автоматическое создание таблиц при запуске
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            dbContext.Database.Migrate(); // Применяет миграции (или создает таблицы, если их нет)
+        }
 
         // Настройка HTTP конвейера запросов
         if (app.Environment.IsDevelopment())
