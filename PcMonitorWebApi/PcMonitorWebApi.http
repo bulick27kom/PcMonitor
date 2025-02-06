@@ -1,6 +1,0 @@
-@PcMonitorWebApi_HostAddress = http://localhost:5209
-
-GET {{PcMonitorWebApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

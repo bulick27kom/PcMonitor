@@ -1,11 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using PcMonitorWebApi.Data;
+using Serilog;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+        // Настройка Serilog для логирования
+        builder.Host.UseSerilog((context, configuration) =>
+        {
+            configuration.WriteTo.Console();
+        });
+
+        // Добавление DbContext с SQLite
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlite("Data Source=db.db"));
+
 
         // Добавление сервисов в контейнер
         builder.Services.AddControllers();
@@ -23,6 +37,9 @@ internal class Program
 
         var app = builder.Build();
 
+        // Инициализация базы данных
+        InitializeDatabase(app);
+
         // Настройка HTTP конвейера запросов
         if (app.Environment.IsDevelopment())
         {
@@ -39,6 +56,16 @@ internal class Program
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static void InitializeDatabase(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<AppDbContext>();
+
+        // Применяем миграции автоматически при запуске приложения
+        context.Database.Migrate();
     }
 }
 
