@@ -66,16 +66,6 @@ internal class Program
 
         app.Run();
     }
-
-    private static void InitializeDatabase(WebApplication app)
-    {
-        using var scope = app.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<AppDbContext>();
-
-        // Применяем миграции автоматически при запуске приложения
-        context.Database.Migrate();
-    }
 }
 
 
