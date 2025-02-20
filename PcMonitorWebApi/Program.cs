@@ -14,6 +14,11 @@ internal class Program
         builder.Host.UseSerilog((context, configuration) =>
         {
             configuration.WriteTo.Console();
+            configuration.WriteTo.File(path: "logs/log-.txt",
+                                       rollOnFileSizeLimit: true,
+                                       fileSizeLimitBytes: 50 * 1024 * 1024,
+                                       retainedFileCountLimit: null, // Хранить все архивы
+                                       shared: true);
         });
 
         // Подключение базы данных (SQLite по умолчанию)
