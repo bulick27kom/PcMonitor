@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PcMonitorWebApi.Data;
+using PcMonitorWebApi.Servises;
+using PcMonitorWebApi.Servises.Interfaces;
 using Serilog;
 
 internal class Program
@@ -28,6 +30,9 @@ internal class Program
 
         // Добавление сервисов в контейнер
         builder.Services.AddControllers();
+
+        //Добавление сервисов
+        builder.Services.AddScoped<IComputerService, ComputerService>();
 
         // Добавление поддержки Swagger/OpenAPI
         builder.Services.AddEndpointsApiExplorer();

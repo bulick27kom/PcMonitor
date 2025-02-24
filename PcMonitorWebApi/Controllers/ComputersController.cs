@@ -3,65 +3,35 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PcMonitorWebApi.Data.Models;
 using PcMonitorWebApi.Data;
+using PcMonitorWebApi.Servises.Interfaces;
 
 namespace PcMonitorWebApi.Controllers
 {
-    [ApiController] // Атрибут, указывающий, что данный класс является API-контроллером
-    [Route("api/[controller]")] // Определяет маршрут: api/computers
+    [ApiController]
+    [Route("api/[controller]")]
     public class ComputersController : ControllerBase
     {
-        private readonly AppDbContext _context; // Контекст базы данных
-        private readonly ILogger<ComputersController> _logger; // Логгер для записи информации и ошибок
+        private readonly IComputerService _computerService;
+        private readonly ILogger<ComputersController> _logger;
 
-        // Конструктор контроллера, принимающий зависимости через внедрение зависимостей (Dependency Injection)
-        public ComputersController(AppDbContext context, ILogger<ComputersController> logger)
+        public ComputersController(IComputerService computerService, ILogger<ComputersController> logger)
         {
-            _context = context;
+            _computerService = computerService;
             _logger = logger;
         }
 
         /// <summary>
-        /// Добавление нового компьютера в базу данных
+        /// Получение компьютера по имени
         /// </summary>
-        /// <param name="computer">Объект компьютера, переданный в теле запроса</param>
-        /// <returns>Ответ 201 Created с добавленным объектом или 500 Internal Server Error в случае ошибки</returns>
-        [HttpPost]
-        public async Task<IActionResult> PostComputer([FromBody] Computer computer)
+        /// <param name="name">Имя компьютера</param>
+        /// <returns>Компьютер или 404 Not Found</returns>
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetComputerByName(string name)
         {
-            try
-            {
-                _context.Computers.Add(computer); // Добавляем объект в контекст
-                await _context.SaveChangesAsync(); // Асинхронно сохраняем изменения в базе данных
-
-                // Возвращаем статус 201 Created с ссылкой на созданный объект
-                return CreatedAtAction(nameof(GetComputer), new { id = computer.Id }, computer);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error saving computer data."); // Логируем ошибку
-                return StatusCode(500, "Internal server error"); // Возвращаем ошибку сервера
-            }
-        }
-
-        /// <summary>
-        /// Получение информации о конкретном компьютере по ID
-        /// </summary>
-        /// <param name="id">Идентификатор компьютера</param>
-        /// <returns>Объект компьютера или 404 Not Found, если не найден</returns>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetComputer(int id)
-        {
-            var computer = await _context.Computers
-                .Include(c => c.Processor)         // Загружаем процессор
-                .Include(c => c.MemoryModules)     // Загружаем модули памяти
-                .Include(c => c.DiskDrives)        // Загружаем диски
-                .Include(c => c.GraphicsCards)     // Загружаем видеокарты
-                .Include(c => c.NetworkInterfaces) // Загружаем сетевые интерфейсы
-                .Include(c => c.Group)             // Загружаем группу
-                .FirstOrDefaultAsync(c => c.Id == id);
-
+            var computer = await _computerService.GetComputerByNameAsync(name);
             if (computer == null)
             {
+                _logger.LogWarning("Компьютер с именем {ComputerName} не найден", name);
                 return NotFound();
             }
 
@@ -69,23 +39,50 @@ namespace PcMonitorWebApi.Controllers
         }
 
         /// <summary>
-        /// Получение списка всех компьютеров в базе данных
+        /// Получение списка всех компьютеров
         /// </summary>
-        /// <returns>Список всех компьютеров</returns>
+        /// <returns>Список компьютеров</returns>
         [HttpGet]
-        public async Task<IActionResult> GetComputers()
+        public async Task<IActionResult> GetAllComputers()
         {
-            var computers = await _context.Computers
-                .Include(c => c.Processor)         // Загружаем процессор
-                .Include(c => c.MemoryModules)     // Загружаем модули памяти
-                .Include(c => c.DiskDrives)        // Загружаем диски
-                .Include(c => c.GraphicsCards)     // Загружаем видеокарты
-                .Include(c => c.NetworkInterfaces) // Загружаем сетевые интерфейсы
-                .Include(c => c.Group)             // Загружаем группу
-                .ToListAsync(); // Получаем список компьютеров из базы данных
-
+            var computers = await _computerService.GetAllComputersAsync();
             return Ok(computers);
         }
 
+        /// <summary>
+        /// Добавление или обновление компьютера
+        /// </summary>
+        /// <param name="computer">Данные компьютера</param>
+        /// <returns>Ответ 201 Created или 200 OK</returns>
+        [HttpPost]
+        public async Task<IActionResult> AddOrUpdateComputer([FromBody] Computer computer)
+        {
+            if (string.IsNullOrWhiteSpace(computer.ComputerName))
+            {
+                _logger.LogWarning("Попытка добавить компьютер без имени");
+                return BadRequest("Имя компьютера не может быть пустым.");
+            }
+
+            try
+            {
+                var existingComputer = await _computerService.GetComputerByNameAsync(computer.ComputerName);
+
+                if (existingComputer != null)
+                {
+                    var updatedComputer = await _computerService.UpdateComputeAsync(computer);
+                    return Ok(updatedComputer);
+                }
+                else
+                {
+                    var newComputer = await _computerService.AddComputeAsync(computer);
+                    return CreatedAtAction(nameof(GetComputerByName), new { name = newComputer.ComputerName }, newComputer);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при сохранении данных компьютера");
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
     }
 }
