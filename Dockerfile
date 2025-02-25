@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Копируем файлы проекта и восстанавливаем зависимости
-COPY ["PcMonitorWebApi/PcMonitorWebApi.csproj", "PcMonitorWebApi/"]
+COPY PcMonitorWebApi/ PcMonitorWebApi/
 RUN dotnet restore "PcMonitorWebApi/PcMonitorWebApi.csproj"
 
 # Копируем весь исходный код и собираем приложение
