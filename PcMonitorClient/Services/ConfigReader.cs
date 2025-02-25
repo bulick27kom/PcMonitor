@@ -66,7 +66,7 @@ namespace PcMonitorClient.Services
         /// </summary>
         public string GetBaseUrl()
         {
-            return !string.IsNullOrEmpty(ServiceName) ? $"http://{ServiceName}" : $"http://{ServiceAddress}";
+            return !string.IsNullOrEmpty(ServiceName) ? $"https://{ServiceName}" : $"https://{ServiceAddress}";
         }
     }
 }

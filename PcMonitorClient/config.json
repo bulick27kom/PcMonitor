@@ -1,6 +1,6 @@
 ﻿{
   "ServiceAddress": "10.1.1.1",
-  "ServiceName": "localhost:7169",
+  "ServiceName": "pcmonitor-production.up.railway.app",
   "ControllerName": "api/computers",
   "RequestTimeout": 10
 }
