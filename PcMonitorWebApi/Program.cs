@@ -55,14 +55,13 @@ internal class Program
         }
 
         // Настройка HTTP конвейера запросов
-        if (app.Environment.IsDevelopment())
-        {
+        
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "PC Monitor API V1");
             });
-        }
+        
 
         app.UseHttpsRedirection();
 
