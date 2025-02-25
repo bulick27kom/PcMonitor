@@ -46,7 +46,9 @@ namespace PcMonitorWebApi.Controllers
         public async Task<IActionResult> GetAllComputers()
         {
             var computers = await _computerService.GetAllComputersAsync();
-            return Ok(computers);
+            if (computers != null)
+                return Ok(computers);
+            else return NotFound();
         }
 
         /// <summary>

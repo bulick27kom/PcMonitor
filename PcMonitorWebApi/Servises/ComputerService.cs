@@ -21,28 +21,16 @@ namespace PcMonitorWebApi.Servises
         /// </summary>
         public async Task<Computer?> GetComputerByNameAsync(string name)
         {
-            return await _context.Computers
-                .Include(c => c.Processor)
-                .Include(c => c.MemoryModules)
-                .Include(c => c.DiskDrives)
-                .Include(c => c.GraphicsCards)
-                .Include(c => c.NetworkInterfaces)
-                .Include(c => c.Group)
+            return await _context.Computers                
                 .FirstOrDefaultAsync(c => c.ComputerName == name);
         }
 
         /// <summary>
         /// Получить все компьютеры
         /// </summary>
-        public async Task<IEnumerable<Computer>> GetAllComputersAsync()
+        public async Task<IEnumerable<Computer>?> GetAllComputersAsync()
         {
-            return await _context.Computers
-                .Include(c => c.Processor)
-                .Include(c => c.MemoryModules)
-                .Include(c => c.DiskDrives)
-                .Include(c => c.GraphicsCards)
-                .Include(c => c.NetworkInterfaces)
-                .Include(c => c.Group)
+            return await _context.Computers              
                 .ToListAsync();
         }
 
